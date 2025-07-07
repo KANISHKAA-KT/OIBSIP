@@ -1,0 +1,42 @@
+import java.util.Scanner;
+
+public class ATM {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Hardcoded UserID and PIN
+        String userID = "user123";
+        String userPIN = "4567";
+
+        System.out.println("============================");
+        System.out.println("🏧 Welcome to Java ATM 🏧");
+        System.out.println("============================");
+
+        // Prompt user for login
+        System.out.print("Enter User ID: ");
+        String inputUserID = sc.nextLine().trim(); // Remove spaces
+
+        System.out.print("Enter User PIN: ");
+        String inputUserPIN = sc.nextLine().trim(); // Remove spaces
+
+        // Check credentials
+        if (inputUserID.equalsIgnoreCase(userID) && inputUserPIN.equals(userPIN)) {
+            System.out.println("✅ Login Successful! 🎉");
+            // Call main menu function
+            showMenu();
+        } else {
+            System.out.println("❌ Invalid User ID or PIN. Please try again.");
+        }
+    }
+
+    static void showMenu() {
+        System.out.println("\n===== Main Menu =====");
+        System.out.println("1. 📝 View Transaction History");
+        System.out.println("2. 💸 Withdraw");
+        System.out.println("3. 💰 Deposit");
+        System.out.println("4. 🔁 Transfer");
+        System.out.println("5. 🚪 Quit");
+        System.out.println("======================");
+        // You can add more functionality here
+    }
+}
