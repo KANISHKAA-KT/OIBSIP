@@ -1,0 +1,160 @@
+import java.util.*;
+
+class User {
+    private String username;
+    private String password;
+    private String name;
+
+    public User(String username, String password, String name) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+    }
+
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+    public void setPassword(String password) { this.password = password; }
+}
+
+class Question {
+    String question;
+    String[] options;
+    int correctAnswer; // 1, 2, 3, or 4
+
+    public Question(String question, String[] options, int correctAnswer) {
+        this.question = question;
+        this.options = options;
+        this.correctAnswer = correctAnswer;
+    }
+}
+
+public class QuizSystem {
+    static Scanner sc = new Scanner(System.in);
+    static User currentUser;
+    static boolean timerExpired = false;
+
+    public static void main(String[] args) {
+        User user = new User("user1", "1234", "John Doe"); // Sample user
+        System.out.println("🎯 Welcome to Java Quiz System!");
+
+        if (login(user)) {
+            int choice;
+            do {
+                System.out.println("\n===== MENU =====");
+                System.out.println("1. Update Profile");
+                System.out.println("2. Start Quiz");
+                System.out.println("3. Logout");
+                System.out.print("Enter your choice: ");
+                choice = sc.nextInt();
+                sc.nextLine(); // Consume newline
+
+                switch (choice) {
+                    case 1:
+                        updateProfile(user);
+                        break;
+                    case 2:
+                        startQuiz();
+                        break;
+                    case 3:
+                        System.out.println("👋 Logged out successfully. Goodbye!");
+                        break;
+                    default:
+                        System.out.println("⚠️ Invalid choice! Try again.");
+                }
+            } while (choice != 3);
+        } else {
+            System.out.println("Too many failed login attempts. Exiting...");
+        }
+    }
+
+    static boolean login(User user) {
+        int attempts = 3;
+        while (attempts > 0) {
+            System.out.print("Enter Username: ");
+            String username = sc.nextLine();
+            System.out.print("Enter Password: ");
+            String password = sc.nextLine();
+
+            if (username.equals(user.getUsername()) && password.equals(user.getPassword())) {
+                currentUser = user;
+                System.out.println("✅ Login Successful! Welcome, " + user.getName());
+                return true;
+            } else {
+                attempts--;
+                System.out.println("❌ Incorrect credentials. Attempts left: " + attempts);
+            }
+        }
+        return false;
+    }
+
+    static void updateProfile(User user) {
+        System.out.println("\n===== Update Profile =====");
+        System.out.print("Enter new name: ");
+        String newName = sc.nextLine();
+        System.out.print("Enter new password: ");
+        String newPassword = sc.nextLine();
+
+        user.setName(newName);
+        user.setPassword(newPassword);
+        System.out.println("✅ Profile updated successfully!");
+    }
+
+    static void startQuiz() {
+        List<Question> questions = new ArrayList<>();
+        questions.add(new Question("What is the capital of India?",
+                new String[]{"Delhi", "Mumbai", "Kolkata", "Chennai"}, 1));
+        questions.add(new Question("Which planet is known as the Red Planet?",
+                new String[]{"Earth", "Mars", "Jupiter", "Venus"}, 2));
+        questions.add(new Question("Who wrote 'Romeo and Juliet'?",
+                new String[]{"Charles Dickens", "Shakespeare", "Tolstoy", "Hemingway"}, 2));
+
+        Map<Integer, Integer> userAnswers = new HashMap<>();
+        int timeLimitSeconds = 30; // Quiz time limit (30 seconds)
+
+        System.out.println("\n===== Quiz Started! =====");
+        System.out.println("⏳ You have " + timeLimitSeconds + " seconds to complete the quiz.");
+
+        // Start timer in separate thread
+        Thread timerThread = new Thread(() -> {
+            try {
+                Thread.sleep(timeLimitSeconds * 1000);
+                timerExpired = true;
+            } catch (InterruptedException e) {
+                // Ignore interruption
+            }
+        });
+        timerThread.start();
+
+        for (int i = 0; i < questions.size(); i++) {
+            if (timerExpired) {
+                System.out.println("\n⏱️ Time’s up! Auto-submitting your answers...");
+                break;
+            }
+            Question q = questions.get(i);
+            System.out.println("\nQ" + (i + 1) + ". " + q.question);
+            for (int j = 0; j < q.options.length; j++) {
+                System.out.println((j + 1) + ". " + q.options[j]);
+            }
+            System.out.print("Your answer (1-4): ");
+            int answer = sc.nextInt();
+            userAnswers.put(i, answer);
+        }
+
+        calculateScore(questions, userAnswers);
+    }
+
+    static void calculateScore(List<Question> questions, Map<Integer, Integer> userAnswers) {
+        int score = 0;
+        for (int i = 0; i < userAnswers.size(); i++) {
+            int userAnswer = userAnswers.get(i);
+            if (userAnswer == questions.get(i).correctAnswer) {
+                score++;
+            }
+        }
+        System.out.println("\n✅ Quiz submitted!");
+        System.out.println("🎯 Your Score: " + score + " out of " + questions.size());
+    }
+}
